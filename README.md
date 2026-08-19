@@ -6,7 +6,7 @@ A Zotero plugin for recording reading status and PDF reading progress directly i
 
 - Zotero 7, 8, and 9
 - Zotero 10.0.x
-- Version 2.3.0 replaces startup polling with Zotero main-window lifecycle hooks and has been checked against the Zotero 10.0 source APIs.
+- Version 2.3.1 waits for Zotero's UI-ready signal, uses main-window lifecycle hooks, and avoids startup DOM polling.
 
 ## Features
 
