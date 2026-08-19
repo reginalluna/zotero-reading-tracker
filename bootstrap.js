@@ -19,10 +19,9 @@ const EMOJI = {
 };
 
 async function startup({ id, version, rootURI }) {
-    var win = Zotero.getMainWindow();
-    if (win && win.ZoteroPane) {
-        setupUI(win);
-    }
+    // Plugin startup runs before ZoteroPane is constructed (Zotero.Plugins.init()
+    // runs at the end of Zotero.init()), so wait for the item menu element instead.
+    setupUIWhenReady();
 
     registeredColumnKey = await Zotero.ItemTreeManager.registerColumn({
         dataKey: columnDataKey,
@@ -109,11 +108,25 @@ function createXULElement(doc, tagName) {
     return doc.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', tagName);
 }
 
+// Wait until the main window's item context menu is available, then add ours.
+// setupUI returns false until the menu element exists (and once added, true).
+function setupUIWhenReady(timeout = 30000) {
+    let start = Date.now();
+    let tryAdd = () => {
+        let win = Zotero.getMainWindow();
+        if (win && setupUI(win)) return;
+        if (Date.now() - start < timeout) {
+            setTimeout(tryAdd, 100);
+        }
+    };
+    tryAdd();
+}
+
 function setupUI(win) {
     let doc = win.document;
     let contextMenu = doc.getElementById('zotero-itemmenu');
-    if (!contextMenu) return;
-    if (doc.getElementById(menuId)) return;
+    if (!contextMenu) return false;
+    if (doc.getElementById(menuId)) return true;
 
     let menuItem = createXULElement(doc, 'menu');
     menuItem.setAttribute('id', menuId);
@@ -131,6 +144,7 @@ function setupUI(win) {
     createMenuItem(doc, menupopup, `${EMOJI.PAGE} Record Page (Auto)`, () => recordProgressAuto());
 
     contextMenu.appendChild(menuItem);
+    return true;
 }
 
 function createMenuItem(doc, parent, label, action) {

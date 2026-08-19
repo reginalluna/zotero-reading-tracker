@@ -9,6 +9,10 @@
         {
           "version": "2.2.0",
           "update_link": "https://github.com/reginalluna/zotero-reading-tracker/releases/download/v2.2.0/zotero-reading-progress-2.2.0.xpi"
+        },
+        {
+          "version": "2.2.1",
+          "update_link": "https://github.com/reginalluna/zotero-reading-tracker/releases/download/v2.2.1/zotero-reading-progress-2.2.1.xpi"
         }
       ]
     }
