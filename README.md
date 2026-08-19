@@ -2,6 +2,12 @@
 
 A Zotero plugin for recording reading status and PDF reading progress directly in the Zotero library. Compatible with Zotero 7–10.
 
+## Compatibility
+
+- Zotero 7, 8, and 9
+- Zotero 10.0.x
+- Version 2.3.0 replaces startup polling with Zotero main-window lifecycle hooks and has been checked against the Zotero 10.0 source APIs.
+
 ## Features
 
 * Adds a **Reading Status** column to the item table (enable it in the column picker).
