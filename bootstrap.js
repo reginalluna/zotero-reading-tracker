@@ -1,11 +1,4 @@
 // Zotero 7-10 compatibility
-var Services;
-try {
-    ({ Services } = ChromeUtils.importESModule("resource://gre/modules/Services.sys.mjs"));
-} catch (e) {
-    ({ Services } = ChromeUtils.import("resource://gre/modules/Services.jsm"));
-}
-
 var menuId = 'zotero-reading-tracker-menu';
 var columnDataKey = 'reading-status-column-v2';
 var registeredColumnKey = null;
@@ -78,13 +71,16 @@ async function startup({ id, version, rootURI }) {
         }
     });
 
-    // Covers enabling or upgrading the plugin while a main window is open.
-    for (let win of Zotero.getMainWindows()) {
-        setupUI(win);
-    }
-
-    let pane = Zotero.getActiveZoteroPane();
-    if (pane) pane.refresh();
+    // startup() runs before Zotero's main UI is ready. Schedule one setup pass
+    // instead of polling the DOM; onMainWindowLoad covers windows opened later.
+    Zotero.uiReadyPromise.then(() => {
+        if (!registeredColumnKey) return;
+        for (let win of Zotero.getMainWindows()) {
+            setupUI(win);
+        }
+        let pane = Zotero.getActiveZoteroPane();
+        if (pane) pane.refresh();
+    });
 }
 
 function onMainWindowLoad({ window }) {
