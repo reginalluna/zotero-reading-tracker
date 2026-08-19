@@ -1,3 +1,4 @@
+# Builds and publishes the Zotero XPI from the version in manifest.json.
 name: Release XPI
 
 on:
