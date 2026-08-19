@@ -10,6 +10,15 @@ on:
       - manifest.json
       - update.json
       - .github/workflows/release.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - bootstrap.js
+      - manifest.json
+      - update.json
+      - .github/workflows/release.yml
+      - README.md
 
 permissions:
   contents: write
@@ -46,17 +55,19 @@ jobs:
           if-no-files-found: error
 
       - name: Publish release
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           version="${{ steps.package.outputs.version }}"
           xpi="${{ steps.package.outputs.xpi }}"
           tag="v${version}"
+          target="${{ github.event.pull_request.head.sha || github.sha }}"
           if gh release view "$tag" > /dev/null 2>&1; then
             gh release upload "$tag" "$xpi" --clobber
           else
             gh release create "$tag" "$xpi" \
-              --target "${{ github.sha }}" \
+              --target "$target" \
               --title "$tag" \
               --notes "Zotero 10 compatibility update. Replaces startup DOM polling with Zotero main-window lifecycle hooks, retains reading-status and PDF page tracking support for Zotero 7-10, and adds Zotero compatibility metadata to the update feed."
           fi
