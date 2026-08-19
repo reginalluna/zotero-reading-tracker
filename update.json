@@ -1,0 +1,16 @@
+{
+  "addons": {
+    "reginamarza@gmail.com": {
+      "updates": [
+        {
+          "version": "2.1.0",
+          "update_link": "https://github.com/reginalluna/zotero-reading-tracker/releases/download/v2.1.0/zotero-reading-progress-2.1.0.xpi"
+        },
+        {
+          "version": "2.2.0",
+          "update_link": "https://github.com/reginalluna/zotero-reading-tracker/releases/download/v2.2.0/zotero-reading-progress-2.2.0.xpi"
+        }
+      ]
+    }
+  }
+}

@@ -1,51 +1,36 @@
 # Zotero Reading Progress Tracker
 
-Zotero Reading Progress Tracker is a Zotero 9 plugin for recording reading status and PDF reading progress directly in the Zotero library.
+A Zotero plugin for recording reading status and PDF reading progress directly in the Zotero library. Compatible with Zotero 7–10.
 
 ## Features
 
-* Adds a **Reading Status** column to the item table.
-* Supports **To Read**, **Reading**, and **Done** statuses.
-* Records the current page from an open PDF.
-* Provides manual page entry when the page cannot be detected automatically.
-* Works with bibliographic items, attachments, and annotations.
-* Stores reading status as Zotero tags and page progress in the **Extra** field.
-
-## Compatibility
-
-* Zotero 9.0.x
+* Adds a **Reading Status** column to the item table (enable it in the column picker).
+* Supports **To Read**, **Reading**, and **Done** statuses via the right-click menu.
+* Records the current page from an open PDF into the **Extra** field.
+* Works with bibliographic items and their attachments.
 
 ## Installation
 
-1. Open the [Releases](https://github.com/lunarMaxar/zotero-reading-progress/releases) page.
+1. Open the [Releases](https://github.com/reginalluna/zotero-reading-tracker/releases) page.
 2. Download the latest `.xpi` file.
 3. In Zotero, open **Tools → Plugins**.
 4. Select the gear menu and choose **Install Plugin From File…**.
 5. Select the downloaded `.xpi` file.
-6. Open the item-table column picker and enable **Reading Status**.
+6. Enable the **Reading Status** column in the item-table column picker.
 
 ## Usage
 
-Right-click a library item, attachment, or annotation and open **Reading Progress**.
-
-The menu provides commands to:
-
-* set the status to **To Read**, **Reading**, or **Done**;
-* clear the reading status;
-* record the current PDF page;
-* clear the recorded page.
-
-When the corresponding PDF is open, the plugin records its current page automatically. Otherwise, it provides a manual page-entry prompt.
+Right-click a library item and choose **Reading Status** to set it to **To Read**, **Reading**, or **Done**. With the PDF open, choose **Record Page (Auto)** to save the current page.
 
 ## Data Storage
 
-Reading status is stored using the following Zotero tags:
+Reading status is stored as Zotero tags:
 
 * `#status:to-read`
 * `#status:reading`
 * `#status:done`
 
-Page progress is stored in the parent item's **Extra** field:
+Page progress is stored in the item's **Extra** field:
 
 ```text
 Reading Progress: Page 12/30
