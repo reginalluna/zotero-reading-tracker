@@ -12,24 +12,19 @@ var registeredColumnKey = null;
 
 // Emoji rendered via code points to avoid encoding issues
 const EMOJI = {
-    READING: String.fromCodePoint(0x1F7E1), // 🟡
-    TO_READ: String.fromCodePoint(0x1F7E2), // 🟢
-    DONE:    String.fromCodePoint(0x1F534), // 🔴
-    PAGE:    String.fromCodePoint(0x1F4CD)  // 📍
+    READING: String.fromCodePoint(0x1F7E1),
+    TO_READ: String.fromCodePoint(0x1F7E2),
+    DONE:    String.fromCodePoint(0x1F534),
+    PAGE:    String.fromCodePoint(0x1F4CD)
 };
 
 async function startup({ id, version, rootURI }) {
-    // Plugin startup runs before ZoteroPane is constructed (Zotero.Plugins.init()
-    // runs at the end of Zotero.init()), so wait for the item menu element instead.
-    setupUIWhenReady();
-
     registeredColumnKey = await Zotero.ItemTreeManager.registerColumn({
         dataKey: columnDataKey,
         label: 'Reading Status',
         pluginID: id,
         dataProvider: (item, dataKey) => {
             try {
-                // Resolve attachments/notes to their parent item
                 let mainItem = item;
                 if (!item.isRegularItem() && item.parentID) {
                     mainItem = Zotero.Items.get(item.parentID);
@@ -46,7 +41,6 @@ async function startup({ id, version, rootURI }) {
                     statusText = `${EMOJI.DONE} Done`;
                 }
 
-                // Read "Reading Progress: Page X/Y" from the Extra field
                 let pageText = '';
                 let extra = mainItem.getField('extra');
                 if (extra) {
@@ -67,9 +61,7 @@ async function startup({ id, version, rootURI }) {
             }
         },
         renderCell: function (index, data, column, isFirstColumn, doc) {
-            // Zotero 7-10 calls renderCell(index, data, column, isFirstColumn, doc)
             let docEl = doc;
-            // Legacy Zotero 6 signature fallback
             if (!docEl && column && column.tree && column.tree.window) {
                 docEl = column.tree.window.document;
             }
@@ -86,18 +78,30 @@ async function startup({ id, version, rootURI }) {
         }
     });
 
+    // Covers enabling or upgrading the plugin while a main window is open.
+    for (let win of Zotero.getMainWindows()) {
+        setupUI(win);
+    }
+
     let pane = Zotero.getActiveZoteroPane();
     if (pane) pane.refresh();
 }
 
+function onMainWindowLoad({ window }) {
+    setupUI(window);
+}
+
+function onMainWindowUnload({ window }) {
+    removeUI(window);
+}
+
 function shutdown() {
-    var win = Zotero.getMainWindow();
-    if (win) {
-        var menu = win.document.getElementById(menuId);
-        if (menu) menu.remove();
+    for (let win of Zotero.getMainWindows()) {
+        removeUI(win);
     }
     if (registeredColumnKey) {
         Zotero.ItemTreeManager.unregisterColumn(registeredColumnKey);
+        registeredColumnKey = null;
     }
 }
 
@@ -108,25 +112,10 @@ function createXULElement(doc, tagName) {
     return doc.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', tagName);
 }
 
-// Wait until the main window's item context menu is available, then add ours.
-// setupUI returns false until the menu element exists (and once added, true).
-function setupUIWhenReady(timeout = 30000) {
-    let start = Date.now();
-    let tryAdd = () => {
-        let win = Zotero.getMainWindow();
-        if (win && setupUI(win)) return;
-        if (Date.now() - start < timeout) {
-            setTimeout(tryAdd, 100);
-        }
-    };
-    tryAdd();
-}
-
 function setupUI(win) {
     let doc = win.document;
     let contextMenu = doc.getElementById('zotero-itemmenu');
-    if (!contextMenu) return false;
-    if (doc.getElementById(menuId)) return true;
+    if (!contextMenu || doc.getElementById(menuId)) return;
 
     let menuItem = createXULElement(doc, 'menu');
     menuItem.setAttribute('id', menuId);
@@ -144,7 +133,11 @@ function setupUI(win) {
     createMenuItem(doc, menupopup, `${EMOJI.PAGE} Record Page (Auto)`, () => recordProgressAuto());
 
     contextMenu.appendChild(menuItem);
-    return true;
+}
+
+function removeUI(win) {
+    let menu = win.document.getElementById(menuId);
+    if (menu) menu.remove();
 }
 
 function createMenuItem(doc, parent, label, action) {
@@ -173,7 +166,6 @@ async function setStatus(status) {
             await target.saveTx();
         }
 
-        // Zotero 10 undo: batch the status change as one undo step (no-op on Zotero 7-9)
         if (Zotero.UndoHistory && Zotero.UndoHistory.stageAction) {
             Zotero.UndoHistory.stageAction('undo-action-edit-metadata', { count: items.length });
         }
@@ -182,9 +174,7 @@ async function setStatus(status) {
     pane.refresh();
 }
 
-// Find the reader showing any of the given item IDs
 function findReaderForItems(targetIDs) {
-    // Prefer the reader in the active tab
     try {
         let win = Zotero.getMainWindow();
         if (win && win.Zotero_Tabs && win.Zotero_Tabs.selectedType === 'reader') {
@@ -198,7 +188,6 @@ function findReaderForItems(targetIDs) {
         }
     } catch (e) {}
 
-    // Fall back to scanning all open readers
     let readers = Zotero.Reader._readers || [];
     for (let reader of readers) {
         if (targetIDs.has(reader.itemID)) {
@@ -208,9 +197,6 @@ function findReaderForItems(targetIDs) {
     return null;
 }
 
-// Current page and total pages from the open reader.
-// Zotero 7+ dropped the public reader.state getter and Zotero.Reader.getByType(),
-// so read view stats from the internal reader (stable across Zotero 7-10).
 function getReaderPageInfo(reader) {
     let currentPage = null;
     let totalPages = null;
@@ -220,12 +206,11 @@ function getReaderPageInfo(reader) {
             ? reader._internalReader._state.primaryViewStats
             : null;
         if (stats && typeof stats.pageIndex === 'number' && stats.pageIndex >= 0) {
-            currentPage = stats.pageIndex + 1; // pageIndex is 0-based
+            currentPage = stats.pageIndex + 1;
             totalPages = stats.pagesCount || null;
         }
     } catch (e) {}
 
-    // Legacy Zotero 6 fallback
     if (!currentPage) {
         try {
             let state = reader && reader.state;
@@ -289,7 +274,6 @@ async function recordProgressAuto() {
     }
 
     targetItem.setField('extra', newExtra);
-    // Zotero 10 undo; ignored by Zotero 7-9
     await targetItem.saveTx({
         undoAction: 'undo-action-edit-metadata',
         undoActionArgs: { count: 1 }
