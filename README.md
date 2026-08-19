@@ -24,6 +24,10 @@ A Zotero plugin for recording reading status and PDF reading progress directly i
 5. Select the downloaded `.xpi` file.
 6. Enable the **Reading Status** column in the item-table column picker.
 
+## Release validation
+
+Release builds check JavaScript syntax, validate the manifest and update feed, build the XPI, and test the archive before publication.
+
 ## Usage
 
 Right-click a library item and choose **Reading Status** to set it to **To Read**, **Reading**, or **Done**. With the PDF open, choose **Record Page (Auto)** to save the current page.
