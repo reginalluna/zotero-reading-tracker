@@ -1,0 +1,61 @@
+name: Release XPI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - bootstrap.js
+      - manifest.json
+      - update.json
+      - .github/workflows/release.yml
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate source
+        run: |
+          node --check bootstrap.js
+          jq -e . manifest.json > /dev/null
+          jq -e . update.json > /dev/null
+
+      - name: Build XPI
+        id: package
+        env:
+          TZ: America/Toronto
+        run: |
+          version="$(jq -r '.version' manifest.json)"
+          xpi="zotero-reading-progress-${version}.xpi"
+          touch bootstrap.js manifest.json
+          zip -X -q "$xpi" manifest.json bootstrap.js
+          unzip -t "$xpi"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "xpi=$xpi" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zotero-reading-progress-${{ steps.package.outputs.version }}
+          path: ${{ steps.package.outputs.xpi }}
+          if-no-files-found: error
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${{ steps.package.outputs.version }}"
+          xpi="${{ steps.package.outputs.xpi }}"
+          tag="v${version}"
+          if gh release view "$tag" > /dev/null 2>&1; then
+            gh release upload "$tag" "$xpi" --clobber
+          else
+            gh release create "$tag" "$xpi" \
+              --target "${{ github.sha }}" \
+              --title "$tag" \
+              --notes "Zotero 10 compatibility update. Replaces startup DOM polling with Zotero main-window lifecycle hooks, retains reading-status and PDF page tracking support for Zotero 7-10, and adds Zotero compatibility metadata to the update feed."
+          fi
