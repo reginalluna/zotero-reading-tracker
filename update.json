@@ -33,6 +33,16 @@
               "strict_max_version": "10.0.*"
             }
           }
+        },
+        {
+          "version": "2.3.2",
+          "update_link": "https://github.com/reginalluna/zotero-reading-tracker/releases/download/v2.3.2/zotero-reading-progress-2.3.2.xpi",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "7.0",
+              "strict_max_version": "10.0.*"
+            }
+          }
         }
       ]
     }
