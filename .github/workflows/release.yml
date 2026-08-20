@@ -34,6 +34,8 @@ jobs:
           node --check bootstrap.js
           jq -e . manifest.json > /dev/null
           jq -e . update.json > /dev/null
+          version="$(jq -r '.version' manifest.json)"
+          jq -e --arg version "$version" '.addons["reginamarza@gmail.com"].updates | any(.version == $version)' update.json > /dev/null
 
       - name: Build XPI
         id: package
@@ -55,19 +57,18 @@ jobs:
           if-no-files-found: error
 
       - name: Publish release
-        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           version="${{ steps.package.outputs.version }}"
           xpi="${{ steps.package.outputs.xpi }}"
           tag="v${version}"
-          target="${{ github.event.pull_request.head.sha || github.sha }}"
           if gh release view "$tag" > /dev/null 2>&1; then
             gh release upload "$tag" "$xpi" --clobber
           else
             gh release create "$tag" "$xpi" \
-              --target "$target" \
+              --target "${{ github.sha }}" \
               --title "$tag" \
-              --notes "Zotero 10 compatibility update. Replaces startup DOM polling with Zotero main-window lifecycle hooks, retains reading-status and PDF page tracking support for Zotero 7-10, and adds Zotero compatibility metadata to the update feed."
+              --notes "Fix Reading Status column alignment by using Zotero's native item-tree cell renderer. Retains reading-status and PDF page tracking support for Zotero 7-10."
           fi
