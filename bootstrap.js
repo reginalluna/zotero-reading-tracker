@@ -151,7 +151,7 @@ async function setStatus(status) {
         }
     });
 
-    pane.refresh();
+    Zotero.ItemTreeManager.refreshColumns();
 }
 
 function findReaderForItems(targetIDs) {
@@ -259,5 +259,5 @@ async function recordProgressAuto() {
         undoActionArgs: { count: 1 }
     });
 
-    pane.refresh();
+    Zotero.ItemTreeManager.refreshColumns();
 }
