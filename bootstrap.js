@@ -52,22 +52,6 @@ async function startup({ id, version, rootURI }) {
             } catch (e) {
                 return '';
             }
-        },
-        renderCell: function (index, data, column, isFirstColumn, doc) {
-            let docEl = doc;
-            if (!docEl && column && column.tree && column.tree.window) {
-                docEl = column.tree.window.document;
-            }
-            if (!docEl) docEl = Zotero.getMainWindow().document;
-
-            let span = docEl.createElementNS("http://www.w3.org/1999/xhtml", "span");
-            span.textContent = data;
-            span.style.display = 'flex';
-            span.style.alignItems = 'center';
-            span.style.height = '100%';
-            span.style.padding = '0 4px';
-            span.style.color = 'inherit';
-            return span;
         }
     });
 
