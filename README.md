@@ -6,7 +6,7 @@ A Zotero plugin for recording reading status and PDF reading progress directly i
 
 - Zotero 7, 8, and 9
 - Zotero 10.0.x
-- Version 2.3.2 uses Zotero's native item-tree cell renderer so Reading Status values stay aligned with their column.
+- Version 2.3.3 explicitly refreshes custom item-tree columns after status or page-progress changes so the Reading Status column updates immediately.
 
 ## Features
 

@@ -70,5 +70,5 @@ jobs:
             gh release create "$tag" "$xpi" \
               --target "${{ github.sha }}" \
               --title "$tag" \
-              --notes "Fix Reading Status column alignment by using Zotero's native item-tree cell renderer. Retains reading-status and PDF page tracking support for Zotero 7-10."
+              --notes "Refresh the Reading Status custom column immediately after status or page-progress changes. Retains Zotero 7-10 compatibility and native item-tree column rendering."
           fi
