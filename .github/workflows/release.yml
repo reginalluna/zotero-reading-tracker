@@ -77,15 +77,3 @@ jobs:
               --title "$tag" \
               --notes "Fix Reading Status writes by using save() inside Zotero's existing database transaction instead of starting a nested saveTx() transaction. Retains Zotero 7-10 compatibility, native item-tree rendering, and explicit column refreshes."
           fi
-
-      - name: Remove older releases and tags
-        if: github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          keep="v${{ steps.package.outputs.version }}"
-          gh release list --limit 100 --json tagName --jq '.[].tagName' | while read -r tag; do
-            if [ "$tag" != "$keep" ]; then
-              gh release delete "$tag" --cleanup-tag --yes
-            fi
-          done
