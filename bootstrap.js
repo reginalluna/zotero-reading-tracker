@@ -143,7 +143,7 @@ async function setStatus(status) {
                 target.removeTag(tag);
             }
             target.addTag(newTag);
-            await target.saveTx();
+            await target.save();
         }
 
         if (Zotero.UndoHistory && Zotero.UndoHistory.stageAction) {
@@ -151,7 +151,7 @@ async function setStatus(status) {
         }
     });
 
-    Zotero.ItemTreeManager.refreshColumns();
+    await Zotero.ItemTreeManager.refreshColumns();
 }
 
 function findReaderForItems(targetIDs) {
@@ -259,5 +259,5 @@ async function recordProgressAuto() {
         undoActionArgs: { count: 1 }
     });
 
-    Zotero.ItemTreeManager.refreshColumns();
+    await Zotero.ItemTreeManager.refreshColumns();
 }
