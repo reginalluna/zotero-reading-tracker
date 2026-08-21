@@ -36,6 +36,11 @@ jobs:
           jq -e . update.json > /dev/null
           version="$(jq -r '.version' manifest.json)"
           jq -e --arg version "$version" '.addons["reginamarza@gmail.com"].updates | any(.version == $version)' update.json > /dev/null
+          grep -q 'await target.save();' bootstrap.js
+          if grep -q 'await target.saveTx();' bootstrap.js; then
+            echo 'Reading status must use save() inside the existing transaction.'
+            exit 1
+          fi
 
       - name: Build XPI
         id: package
@@ -70,5 +75,5 @@ jobs:
             gh release create "$tag" "$xpi" \
               --target "${{ github.sha }}" \
               --title "$tag" \
-              --notes "Refresh the Reading Status custom column immediately after status or page-progress changes. Retains Zotero 7-10 compatibility and native item-tree column rendering."
+              --notes "Fix Reading Status writes by using save() inside Zotero's existing database transaction instead of starting a nested saveTx() transaction. Retains Zotero 7-10 compatibility, native item-tree rendering, and explicit column refreshes."
           fi

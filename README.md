@@ -6,7 +6,7 @@ A Zotero plugin for recording reading status and PDF reading progress directly i
 
 - Zotero 7, 8, and 9
 - Zotero 10.0.x
-- Version 2.3.3 explicitly refreshes custom item-tree columns after status or page-progress changes so the Reading Status column updates immediately.
+- Version 2.3.4 fixes reading-status saves inside Zotero's existing database transaction, so a newly selected status is written and displayed in the Reading Status column.
 
 ## Features
 
@@ -26,7 +26,7 @@ A Zotero plugin for recording reading status and PDF reading progress directly i
 
 ## Release validation
 
-Release builds check JavaScript syntax, validate the manifest and update feed, build the XPI, and test the archive before publication.
+Release builds check JavaScript syntax, validate the manifest and update feed, reject the nested `saveTx()` transaction pattern in the reading-status path, build the XPI, and test the archive before publication.
 
 ## Usage
 
