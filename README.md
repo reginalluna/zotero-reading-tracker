@@ -26,7 +26,7 @@ A Zotero plugin for recording reading status and PDF reading progress directly i
 
 ## Release validation
 
-Release builds check JavaScript syntax, validate the manifest and update feed, reject the nested `saveTx()` transaction pattern in the reading-status path, build the XPI, and test the archive before publication.
+Release builds check JavaScript syntax, validate the manifest and update feed, require the update feed to contain only the current version, reject the nested `saveTx()` transaction pattern in the reading-status path, build the XPI, and test the archive before publication.
 
 ## Usage
 
